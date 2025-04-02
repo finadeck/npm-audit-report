@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.detectAuditFormat = detectAuditFormat;
 exports.convertYarnAuditToNpm = convertYarnAuditToNpm;
+exports.parseYarnAuditOutput = parseYarnAuditOutput;
 exports.normalizeAuditData = normalizeAuditData;
 /**
  * Detects if the input is from yarn audit or npm audit
@@ -96,18 +97,68 @@ function convertYarnAuditToNpm(yarnAuditData) {
     return npmReport;
 }
 /**
+ * Parses yarn audit JSON output which consists of multiple JSON objects, one per line
+ * @param input The raw yarn audit output as string
+ * @returns Array of parsed JSON objects
+ */
+function parseYarnAuditOutput(input) {
+    const lines = input.trim().split('\n');
+    const results = [];
+    for (const line of lines) {
+        try {
+            if (line.trim()) {
+                results.push(JSON.parse(line));
+            }
+        }
+        catch (e) {
+            console.error('Error parsing yarn audit line:', e);
+            // Continue with other lines even if one fails
+        }
+    }
+    return results;
+}
+/**
  * Normalizes different audit formats into our internal format
- * @param jsonData The raw audit JSON data (can be npm or yarn format)
+ * @param jsonDataOrString The raw audit data (can be string, npm object, or yarn array)
  * @returns Normalized AuditReport
  */
-function normalizeAuditData(jsonData) {
-    const format = detectAuditFormat(jsonData);
-    if (format === 'yarn') {
-        return convertYarnAuditToNpm(jsonData);
+function normalizeAuditData(jsonDataOrString) {
+    // If input is a string, we need to determine if it's yarn or npm format
+    if (typeof jsonDataOrString === 'string') {
+        // Try parsing as a single JSON object (npm format)
+        try {
+            const parsed = JSON.parse(jsonDataOrString);
+            return normalizeAuditData(parsed);
+        }
+        catch (e) {
+            // If that fails, try parsing as multiple JSON objects (yarn format)
+            try {
+                const parsedLines = parseYarnAuditOutput(jsonDataOrString);
+                if (parsedLines.length > 0) {
+                    return convertYarnAuditToNpm(parsedLines);
+                }
+            }
+            catch (e2) {
+                throw new Error('Failed to parse audit data in any known format');
+            }
+        }
+    }
+    // If input is already parsed
+    if (Array.isArray(jsonDataOrString)) {
+        // Assume it's yarn format if it's an array
+        return convertYarnAuditToNpm(jsonDataOrString);
     }
     else {
-        // Already in npm format
-        return jsonData;
+        // Assume it's npm format
+        return jsonDataOrString;
     }
+    // Default empty report if all else fails
+    return {
+        vulnerabilities: {},
+        metadata: {
+            vulnerabilities: { info: 0, low: 0, moderate: 0, high: 0, critical: 0, total: 0 },
+            dependencies: { prod: 0, dev: 0, optional: 0, peer: 0, peerOptional: 0, total: 0 }
+        }
+    };
 }
 //# sourceMappingURL=adapter.js.map

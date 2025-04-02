@@ -85,12 +85,12 @@ async function main() {
         console.error('Parsing audit data...');
         let auditReport;
         try {
-            const jsonData = JSON.parse(auditData);
-            // Normalize the data format (handles both npm and yarn audit formats)
-            auditReport = (0, adapter_1.normalizeAuditData)(jsonData);
+            // Pass the raw string data to the normalizer which will handle both npm and yarn formats
+            auditReport = (0, adapter_1.normalizeAuditData)(auditData);
         }
-        catch (parseError) {
-            console.error('Failed to parse audit output. Input is not valid JSON.');
+        catch (error) {
+            console.error('Failed to parse audit output. Input is not valid JSON or in unknown format.');
+            console.error('Error details:', error.message || String(error));
             console.error('Please ensure you are running either:');
             console.error('  npm audit --json | npm-audit-report');
             console.error('  yarn audit --json | npm-audit-report');
