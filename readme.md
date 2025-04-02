@@ -16,13 +16,13 @@ Generate beautiful HTML reports from npm audit output. This tool transforms the 
 ### From GitHub (recommended)
 
 ```bash
-npm install --save-dev github:yourusername/npm-audit-report
+npm install --save-dev github:finadeck/npm-audit-report
 ```
 
 Or specify a specific version/tag:
 
 ```bash
-npm install --save-dev github:yourusername/npm-audit-report#v1.0.0
+npm install --save-dev github:finadeck/npm-audit-report#v1.0.0
 ```
 
 ## Usage
