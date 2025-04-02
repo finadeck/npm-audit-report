@@ -13,26 +13,44 @@ Generate beautiful HTML reports from npm audit output. This tool transforms the 
 
 ## Installation
 
-### From GitHub (recommended)
+### From GitHub 
 
+With npm:
 ```bash
 npm install --save-dev github:finadeck/npm-audit-report
+```
+
+With yarn:
+```bash
+yarn add --dev github:finadeck/npm-audit-report
 ```
 
 Or specify a specific version/tag:
 
 ```bash
+# npm
 npm install --save-dev github:finadeck/npm-audit-report#v1.0.0
+
+# yarn
+yarn add --dev github:finadeck/npm-audit-report#v1.0.0
 ```
 
 ## Usage
 
-### Basic Usage (Pipe from npm audit)
+### Basic Usage with npm
 
 Run an npm audit with JSON output and pipe it to the reporter:
 
 ```bash
 npm audit --json | npm-audit-report
+```
+
+### Basic Usage with yarn
+
+Yarn audit also supports JSON output:
+
+```bash
+yarn audit --json | npm-audit-report
 ```
 
 The HTML report will be generated in the `./npm-audit-report` directory by default.
@@ -58,7 +76,7 @@ npm audit --json | npm-audit-report --output ./docs/security
 npm audit --json | npm-audit-report --filename audit-report.html
 ```
 
-### Using in npm Scripts
+### Using in npm/yarn Scripts
 
 Add to your `package.json`:
 
@@ -70,10 +88,24 @@ Add to your `package.json`:
 }
 ```
 
+For yarn projects:
+
+```json
+{
+  "scripts": {
+    "audit:html": "yarn audit --json | npm-audit-report --output ./security-reports"
+  }
+}
+```
+
 Then run:
 
 ```bash
+# With npm
 npm run audit:html
+
+# With yarn
+yarn audit:html
 ```
 
 ## Options

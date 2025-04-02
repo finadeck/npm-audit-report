@@ -5,6 +5,7 @@ import * as path from 'path';
 import { program } from 'commander';
 import { generateHtmlReport } from './index';
 import { AuditReport } from './types';
+import { normalizeAuditData } from './adapter';
 
 // Helper function to read from stdin
 function readStdin(): Promise<string> {
@@ -59,10 +60,14 @@ async function main() {
     let auditReport: AuditReport;
     
     try {
-      auditReport = JSON.parse(auditData);
+      const jsonData = JSON.parse(auditData);
+      // Normalize the data format (handles both npm and yarn audit formats)
+      auditReport = normalizeAuditData(jsonData);
     } catch (parseError) {
-      console.error('Failed to parse npm audit output. Input is not valid JSON.');
-      console.error('Please ensure you are running: npm audit --json | npm-audit-report');
+      console.error('Failed to parse audit output. Input is not valid JSON.');
+      console.error('Please ensure you are running either:');
+      console.error('  npm audit --json | npm-audit-report');
+      console.error('  yarn audit --json | npm-audit-report');
       process.exit(1);
     }
     
